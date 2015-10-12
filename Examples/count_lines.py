@@ -8,7 +8,7 @@ def count_lines_lambdaexpression():
   # configuration
   APP_NAME = 'count lines'
   conf = SparkConf().setAppName(APP_NAME)
-  conf = conf.setMaster('spark://ukko178:7077')
+  conf = conf.setMaster('spark://ukko160:7077')
   sc = SparkContext(conf=conf)
 
   # core part of the script
@@ -24,7 +24,7 @@ def count_lines_functioncall():
   # configuration
   APP_NAME = 'count lines'
   conf = SparkConf().setAppName(APP_NAME)
-  conf = conf.setMaster('spark://ukko178:7077')
+  conf = conf.setMaster('spark://ukko160:7077')
   sc = SparkContext(conf=conf)
 
   # core part of the script

@@ -8,7 +8,7 @@ def word_count_functioncall():
   # configuration
   APP_NAME = 'word count'
   conf = SparkConf().setAppName(APP_NAME)
-  conf = conf.setMaster('spark://ukko178:7077')
+  conf = conf.setMaster('spark://ukko160:7077')
   sc = SparkContext(conf=conf)
 
   # core part of the script
@@ -30,7 +30,7 @@ def word_count_lambdaexpression():
   # configuration
   APP_NAME = 'word count'
   conf = SparkConf().setAppName(APP_NAME)
-  conf = conf.setMaster('spark://ukko178:7077')
+  conf = conf.setMaster('spark://ukko160:7077')
   sc = SparkContext(conf=conf)
 
   # core part of the script
