@@ -44,7 +44,7 @@ def cf():
   numTraining         = training.count()
   numValidation       = validation.count()
   numTest             = test.count()
-  print "ratings:\t%d\ntraining:\t%d\nvalidation:\t%d\ntest:\t%d\n" % (ratings.count(), training.count(),validation.count(),test.count())
+  print "ratings:\t%d\ntraining:\t%d\nvalidation:\t%d\ntest:\t\t%d\n" % (ratings.count(), training.count(),validation.count(),test.count())
 
   # model training with parameter selection on the validation dataset
   ranks       = [10,20,30]
@@ -58,9 +58,8 @@ def cf():
   for rank, lmbda, numIter in itertools.product(ranks, lambdas, numIters):
     model                   = ALS.train(training, rank, numIter, lmbda)
     predictions             = model.predictAll(validation.map(lambda x:(x[0],x[1])))
-    print predictions.count()
     predictionsAndRatings   = predictions.map(lambda x:((x[0],x[1]),x[2])).join(validation.map(lambda x:((x[0],x[1]),x[2]))).values()
-    validationRmse          = sqrt(predictionsAndRatings.map(lambda x: (x[0] - x[1]) ** 2).reduce(add) / float(numIter))
+    validationRmse          = sqrt(predictionsAndRatings.map(lambda x: (x[0] - x[1]) ** 2).reduce(add) / float(numValidation))
     print rank, lmbda, numIter, validationRmse
     
     if (validationRmse < bestValidationRmse):
@@ -69,7 +68,19 @@ def cf():
       bestRank = rank
       bestLambda = lmbda
       bestNumIter = numIter
+    break
   print bestRank, bestLambda, bestNumIter, bestValidationRmse 
+
+  # test rating
+  predictions             = model.predictAll(test.map(lambda x:(x[0],x[1])))
+  predictionsAndRatings   = predictions.map(lambda x:((x[0],x[1]),x[2])).join(validation.map(lambda x:((x[0],x[1]),x[2]))).values()
+  validationRmse          = sqrt(predictionsAndRatings.map(lambda x: (x[0] - x[1]) ** 2).reduce(add) / float(numTest))
+  print "Collaborative filtering:\t%.2f\n" % validationRmse
+
+  # use mean rating as predictions 
+  meanRating = training.map(lambda x: x[2]).mean()
+  baselineRmse = sqrt(test.map(lambda x: (meanRating - x[2]) ** 2).reduce(add) / numTest)
+  print "Mean imputation:\t%.2f\n" % baselineRmse
 
   sc.stop()
 
