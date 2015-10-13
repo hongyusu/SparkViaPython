@@ -14,7 +14,6 @@ def parseRating(line):
   Parses a rating record in MovieLens format userId::movieId::rating::timestamp.
   """
   fields = line.strip().split("::")
-  print long(fields[0]) % 10, (int(fields[0]), int(fields[1]), float(fields[2]))
   return long(fields[0]) % 10, (int(fields[0]), int(fields[1]), float(fields[2]))
 
 
@@ -25,6 +24,7 @@ def cf():
   collaborative filtering approach for movie recommendation
   file format UserID::MovieID::Rating::Time
   '''
+  print __doc__
   # set up Spark environment
   APP_NAME = "Collaboratove filtering for movie recommendation"
   conf = SparkConf().setAppName(APP_NAME)
@@ -38,18 +38,18 @@ def cf():
   numMovies   = ratings.values().map(lambda r:r[1]).distinct().count()
   print "--- %d ratings from %d users for %d movies\n" % (numRatings, numUsers, numMovies)
 
-  numPartitions = 10
-  training    = ratings.filter(lambda r:r).values().repartition(numPartitions).cache()
-  validation  = ratings.filter(lambda r:r).values().repartition(numPartitions).cache()
-  test        = ratings.filter(lambda r:r).values().cache()
+  numPartitions = 40
+  training    = ratings.filter(lambda r:r[0]<6             ).values().repartition(numPartitions).cache()
+  validation  = ratings.filter(lambda r:r[0]>=6 and r[0]<8 ).values().repartition(numPartitions).cache()
+  test        = ratings.filter(lambda r:r[0]>=8 and r[0]<=9).values().cache()
   numTraining         = training.count()
   numValidation       = validation.count()
   numTest             = test.count()
-  print '-----',ratings.count(), training.count(),validation.count(),test.count()
+  print "ratings:\t%d\ntraining:\t%d\nvalidation:\t%d\ntest:\t%d\n" % (ratings.count(), training.count(),validation.count(),test.count())
 
-  # training with ALS
-  ranks       = [8,12]
-  lambdas     = [0.1,0.01]
+  # model training with parameter selection on the validation dataset
+  ranks       = [10,20,30]
+  lambdas     = [0.1,0.01,0.001]
   numIters    = [10,20]
   bestModel   = None
   bestValidationRmse = float("inf")
@@ -59,6 +59,7 @@ def cf():
   for rank, lmbda, numIter in itertools.product(ranks, lambdas, numIters):
     model                   = ALS.train(training, rank, numIter, lmbda)
     predictions             = model.predictAll(validation.map(lambda x:(x[0],x[1])))
+    print predictions.count()
     predictionsAndRatings   = predictions.map(lambda x:((x[0],x[1]),x[2])).join(validation.map(lambda x:((x[0],x[1]),x[2]))).values()
     validationRmse          = sqrt(predictionsAndRatings.map(lambda x: (x[0] - x[1]) ** 2).reduce(add) / float(numIter))
     print rank, lmbda, numIter, validationRmse
