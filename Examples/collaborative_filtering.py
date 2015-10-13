@@ -24,7 +24,6 @@ def cf():
   collaborative filtering approach for movie recommendation
   file format UserID::MovieID::Rating::Time
   '''
-  print __doc__
   # set up Spark environment
   APP_NAME = "Collaboratove filtering for movie recommendation"
   conf = SparkConf().setAppName(APP_NAME)
@@ -39,9 +38,9 @@ def cf():
   print "--- %d ratings from %d users for %d movies\n" % (numRatings, numUsers, numMovies)
 
   numPartitions = 40
-  training    = ratings.filter(lambda r:r[0]<6             ).values().repartition(numPartitions).cache()
-  validation  = ratings.filter(lambda r:r[0]>=6 and r[0]<8 ).values().repartition(numPartitions).cache()
-  test        = ratings.filter(lambda r:r[0]>=8 and r[0]<=9).values().cache()
+  training    = ratings.filter(lambda r:r[0]<8              ).values().repartition(numPartitions).cache()
+  validation  = ratings.filter(lambda r:r[0]<8              ).values().repartition(numPartitions).cache()
+  test        = ratings.filter(lambda r:r[0]>=8 and r[0]<=9 ).values().cache()
   numTraining         = training.count()
   numValidation       = validation.count()
   numTest             = test.count()

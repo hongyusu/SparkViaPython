@@ -1,3 +1,7 @@
-None
 --- 1000209 ratings from 6040 users for 3706 movies
+
+ratings:	1000209
+training:	794778
+validation:	794778
+test:	205431
 
