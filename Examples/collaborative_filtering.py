@@ -37,14 +37,12 @@ def cf():
   numMovies   = ratings.values().map(lambda r:r[1]).distinct().count()
   print "--- %d ratings from %d users for %d movies\n" % (numRatings, numUsers, numMovies)
 
-  numPartitions = 40
+  numPartitions = 10
   training    = ratings.filter(lambda r:r[0]<8              ).values().repartition(numPartitions).cache()
-  validation  = ratings.filter(lambda r:r[0]<8              ).values().repartition(numPartitions).cache()
   test        = ratings.filter(lambda r:r[0]>=8 and r[0]<=9 ).values().cache()
   numTraining         = training.count()
-  numValidation       = validation.count()
   numTest             = test.count()
-  print "ratings:\t%d\ntraining:\t%d\nvalidation:\t%d\ntest:\t\t%d\n" % (ratings.count(), training.count(),validation.count(),test.count())
+  print "ratings:\t%d\ntraining:\t%d\ntest:\t\t%d\n" % (ratings.count(), training.count(),test.count())
 
   # model training with parameter selection on the validation dataset
   ranks       = [10,20,30]
@@ -57,20 +55,23 @@ def cf():
   bestNumIter = -1
   for rank, lmbda, numIter in itertools.product(ranks, lambdas, numIters):
     model                   = ALS.train(training, rank, numIter, lmbda)
-    predictions             = model.predictAll(validation.map(lambda x:(x[0],x[1])))
-    predictionsAndRatings   = predictions.map(lambda x:((x[0],x[1]),x[2])).join(validation.map(lambda x:((x[0],x[1]),x[2]))).values()
-    validationRmse          = sqrt(predictionsAndRatings.map(lambda x: (x[0] - x[1]) ** 2).reduce(add) / float(numValidation))
+    predictions             = model.predictAll(training.map(lambda x:(x[0],x[1])))
+    predictionsAndRatings   = predictions.map(lambda x:((x[0],x[1]),x[2])).join(training.map(lambda x:((x[0],x[1]),x[2]))).values()
+    validationRmse          = sqrt(predictionsAndRatings.map(lambda x: (x[0] - x[1]) ** 2).reduce(add) / float(numTraining))
     print rank, lmbda, numIter, validationRmse
-    
     if (validationRmse < bestValidationRmse):
       bestModel = model
       bestValidationRmse = validationRmse
       bestRank = rank
       bestLambda = lmbda
       bestNumIter = numIter
-    break
   print bestRank, bestLambda, bestNumIter, bestValidationRmse 
-  print "ALS on train:\t%.2f" % bestValidationRmse
+  print "ALS on train:\t\t%.2f" % bestValidationRmse
+  
+  meanRating = training.map(lambda x: x[2]).mean()
+  baselineRmse = sqrt(training.map(lambda x: (meanRating - x[2]) ** 2).reduce(add) / numTraining)
+  print "Mean imputation:\t\t%.2f" % baselineRmse
+
 
   # predict test ratings
   predictions             = bestModel.predictAll(test.map(lambda x:(x[0],x[1])))
@@ -78,6 +79,7 @@ def cf():
     predictionsAndRatings   = predictions.map(lambda x:((x[0],x[1]),x[2])).join(validation.map(lambda x:((x[0],x[1]),x[2]))).values()
     testRmse          = sqrt(predictionsAndRatings.map(lambda x: (x[0] - x[1]) ** 2).reduce(add) / float(numTest))
   except:
+    print 'default value for test'
     testRmse          = sqrt(test.map(lambda x: (x[0] - 0) ** 2).reduce(add) / float(numTest))
   print "ALS on test:\t%.2f" % testRmse
 
