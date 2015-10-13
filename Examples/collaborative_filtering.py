@@ -71,10 +71,13 @@ def cf():
     break
   print bestRank, bestLambda, bestNumIter, bestValidationRmse 
 
-  # test rating
-  predictions             = model.predictAll(test.map(lambda x:(x[0],x[1])))
-  predictionsAndRatings   = predictions.map(lambda x:((x[0],x[1]),x[2])).join(validation.map(lambda x:((x[0],x[1]),x[2]))).values()
-  validationRmse          = sqrt(predictionsAndRatings.map(lambda x: (x[0] - x[1]) ** 2).reduce(add) / float(numTest))
+  # predict test ratings
+  predictions             = bestModel.predictAll(test.map(lambda x:(x[0],x[1])))
+  try:
+    predictionsAndRatings   = predictions.map(lambda x:((x[0],x[1]),x[2])).join(validation.map(lambda x:((x[0],x[1]),x[2]))).values()
+    validationRmse          = sqrt(predictionsAndRatings.map(lambda x: (x[0] - x[1]) ** 2).reduce(add) / float(numTest))
+  except:
+    validationRmse          = sqrt(test.map(lambda x: (x[0] - 0) ** 2).reduce(add) / float(numTest))
   print "Collaborative filtering:\t%.2f\n" % validationRmse
 
   # use mean rating as predictions 
