@@ -70,20 +70,21 @@ def cf():
       bestNumIter = numIter
     break
   print bestRank, bestLambda, bestNumIter, bestValidationRmse 
+  print "ALS on train:\t%.2f" % bestValidationRmse
 
   # predict test ratings
   predictions             = bestModel.predictAll(test.map(lambda x:(x[0],x[1])))
   try:
     predictionsAndRatings   = predictions.map(lambda x:((x[0],x[1]),x[2])).join(validation.map(lambda x:((x[0],x[1]),x[2]))).values()
-    validationRmse          = sqrt(predictionsAndRatings.map(lambda x: (x[0] - x[1]) ** 2).reduce(add) / float(numTest))
+    testRmse          = sqrt(predictionsAndRatings.map(lambda x: (x[0] - x[1]) ** 2).reduce(add) / float(numTest))
   except:
-    validationRmse          = sqrt(test.map(lambda x: (x[0] - 0) ** 2).reduce(add) / float(numTest))
-  print "Collaborative filtering:\t%.2f\n" % validationRmse
+    testRmse          = sqrt(test.map(lambda x: (x[0] - 0) ** 2).reduce(add) / float(numTest))
+  print "ALS on test:\t%.2f" % testRmse
 
   # use mean rating as predictions 
   meanRating = training.map(lambda x: x[2]).mean()
   baselineRmse = sqrt(test.map(lambda x: (meanRating - x[2]) ** 2).reduce(add) / numTest)
-  print "Mean imputation:\t%.2f\n" % baselineRmse
+  print "Mean imputation:\t%.2f" % baselineRmse
 
   sc.stop()
 
