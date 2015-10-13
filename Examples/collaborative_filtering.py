@@ -14,6 +14,7 @@ def parseRating(line):
   Parses a rating record in MovieLens format userId::movieId::rating::timestamp.
   """
   fields = line.strip().split("::")
+  print long(fields[0]) % 10, (int(fields[0]), int(fields[1]), float(fields[2]))
   return long(fields[0]) % 10, (int(fields[0]), int(fields[1]), float(fields[2]))
 
 
@@ -25,12 +26,12 @@ def cf():
   file format UserID::MovieID::Rating::Time
   '''
   # set up Spark environment
-  APP_NAME = "recommender_CP_ALS"
+  APP_NAME = "Collaboratove filtering for movie recommendation"
   conf = SparkConf().setAppName(APP_NAME)
   conf = conf.setMaster('spark://ukko160:7077')
   sc = SparkContext(conf=conf)
 
-  data = sc.textFile('../spark-1.4.1-bin-hadoop2.6/data/mllib/als/sample_movielens_ratings.txt')
+  data = sc.textFile('../Data/ml-1m/ratings.dat')
   ratings = data.map(parseRating)
   numRatings  = ratings.count()
   numUsers    = ratings.values().map(lambda r:r[0]).distinct().count()
@@ -62,13 +63,13 @@ def cf():
     validationRmse          = sqrt(predictionsAndRatings.map(lambda x: (x[0] - x[1]) ** 2).reduce(add) / float(numIter))
     print rank, lmbda, numIter, validationRmse
     
-    if 0 and (validationRmse < bestValidationRmse):
+    if (validationRmse < bestValidationRmse):
       bestModel = model
       bestValidationRmse = validationRmse
       bestRank = rank
       bestLambda = lmbda
       bestNumIter = numIter
-  print bestRank, bestLmbda, bestNumIter, bestValidationRmse 
+  print bestRank, bestLambda, bestNumIter, bestValidationRmse 
 
   sc.stop()
 
