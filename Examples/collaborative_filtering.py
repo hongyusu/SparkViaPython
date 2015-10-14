@@ -37,11 +37,12 @@ def cf(filename):
 
   # select training and testing
   numPartitions = 10
-  training    = ratings.filter(lambda r:r[0][0]<9 or r[0][0]>=9 and r[0][1]<9 ).values().repartition(numPartitions).cache()
-  test        = ratings.filter(lambda r:r[0][0]>=9 and r[0][1]>=9          ).values().cache()
+  training    = ratings.filter(lambda r:r[0][0]<9 or r[0][0]==9 and r[0][1]!=2 ).values().repartition(numPartitions).cache()
+  test        = ratings.filter(lambda r:r[0][0]==9 and r[0][1]==2          ).values().cache()
   numTraining         = training.count()
   numTest             = test.count()
   print "ratings:\t%d\ntraining:\t%d\ntest:\t\t%d\n" % (ratings.count(), training.count(),test.count())
+  return
 
   # model training with parameter selection on the validation dataset
   ranks       = [10,20,30]
