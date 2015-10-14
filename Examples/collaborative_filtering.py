@@ -14,12 +14,9 @@ def parseRating(line):
   Parses a rating record in MovieLens format userId::movieId::rating::timestamp.
   """
   fields = line.strip().split("::")
-  return long(fields[0]) % 10, (int(fields[0]), int(fields[1]), float(fields[2]))
+  return (long(fields[0]) % 10,long(fields[1]) % 10), (int(fields[0]), int(fields[1]), float(fields[2]))
 
-
-
-
-def cf():
+def cf(filename):
   '''
   collaborative filtering approach for movie recommendation
   file format UserID::MovieID::Rating::Time
@@ -30,16 +27,18 @@ def cf():
   conf = conf.setMaster('spark://ukko160:7077')
   sc = SparkContext(conf=conf)
 
-  data = sc.textFile('../Data/ml-1m/ratings.dat')
+  # read in data
+  data = sc.textFile(filename)
   ratings = data.map(parseRating)
   numRatings  = ratings.count()
   numUsers    = ratings.values().map(lambda r:r[0]).distinct().count()
   numMovies   = ratings.values().map(lambda r:r[1]).distinct().count()
   print "--- %d ratings from %d users for %d movies\n" % (numRatings, numUsers, numMovies)
 
+  # select training and testing
   numPartitions = 10
-  training    = ratings.filter(lambda r:r[0]<8              ).values().repartition(numPartitions).cache()
-  test        = ratings.filter(lambda r:r[0]>=8 and r[0]<=9 ).values().cache()
+  training    = ratings.filter(lambda r:r[0][0]<9 or r[0][0]>=9 and r[0][1]<9 ).values().repartition(numPartitions).cache()
+  test        = ratings.filter(lambda r:r[0][0]>=9 and r[0][1]>=9          ).values().cache()
   numTraining         = training.count()
   numTest             = test.count()
   print "ratings:\t%d\ntraining:\t%d\ntest:\t\t%d\n" % (ratings.count(), training.count(),test.count())
@@ -65,6 +64,7 @@ def cf():
       bestRank = rank
       bestLambda = lmbda
       bestNumIter = numIter
+    break
   print bestRank, bestLambda, bestNumIter, bestValidationRmse 
   print "ALS on train:\t\t%.2f" % bestValidationRmse
   
@@ -93,6 +93,8 @@ def cf():
 
 
 if __name__ == '__main__':
-  cf()
+  filenames = ['../Data/ml-1m/ratings.dat']
+  for filename in filenames:
+    cf(filename)
 
 
