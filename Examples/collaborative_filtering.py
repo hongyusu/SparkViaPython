@@ -14,7 +14,7 @@ def parseRating(line):
   Parses a rating record in MovieLens format userId::movieId::rating::timestamp.
   """
   fields = line.strip().split("::")
-  return (long(fields[0]) % 1,long(fields[1]) % 1), (int(fields[0]), int(fields[1]), float(fields[2]))
+  return (int(int(fields[0])/10),int(int(fields[1])/10)), (int(fields[0]), int(fields[1]), float(fields[2]))
 
 def cf(filename):
   '''
@@ -37,10 +37,10 @@ def cf(filename):
 
   # select training and testing
   numPartitions = 10
-  training    = ratings.filter(lambda r:not(r[0][0]==1 and r[0][1]==661) ).values().repartition(numPartitions).cache()
-  test        = ratings.filter(lambda r:(r[0][0]==1 and r[0][1]==661) ).values().cache()
-  numTraining         = training.count()
-  numTest             = test.count()
+  training    = ratings.filter(lambda r: not(r[0][0]<=1 and r[0][1]<=1) ).values().repartition(numPartitions).cache()
+  test        = ratings.filter(lambda r: r[0][0]<=1 and r[0][1]<=1 ).values().cache()
+  numTraining = training.count()
+  numTest     = test.count()
   print "ratings:\t%d\ntraining:\t%d\ntest:\t\t%d\n" % (ratings.count(), training.count(),test.count())
 
   # model training with parameter selection on the validation dataset
@@ -74,12 +74,12 @@ def cf(filename):
 
 
   # predict test ratings
-  predictions             = bestModel.predictAll(test.map(lambda x:(x[0],x[1])))
   try:
-    predictionsAndRatings   = predictions.map(lambda x:((x[0],x[1]),x[2])).join(validation.map(lambda x:((x[0],x[1]),x[2]))).values()
+    predictions             = bestModel.predictAll(test.map(lambda x:(x[0],x[1])))
+    predictionsAndRatings   = predictions.map(lambda x:((x[0],x[1]),x[2])).join(test.map(lambda x:((x[0],x[1]),x[2]))).values()
     testRmse          = sqrt(predictionsAndRatings.map(lambda x: (x[0] - x[1]) ** 2).reduce(add) / float(numTest))
-  except:
-    print 'default value for test'
+  except Exception as myerror:
+    print myerror
     testRmse          = sqrt(test.map(lambda x: (x[0] - 0) ** 2).reduce(add) / float(numTest))
   print "ALS on test:\t%.2f" % testRmse
 
@@ -93,7 +93,7 @@ def cf(filename):
 
 
 if __name__ == '__main__':
-  filenames = ['../Data/ml-1m/ratings.dat']
+  filenames = ['../Data/ml-1m/ratings.dat','../Data/ml-10M100K/ratings.dat']
   for filename in filenames:
     cf(filename)
 
