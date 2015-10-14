@@ -14,7 +14,7 @@ def parseRating(line):
   Parses a rating record in MovieLens format userId::movieId::rating::timestamp.
   """
   fields = line.strip().split("::")
-  return (int(int(fields[0])/10),int(int(fields[1])/10)), (int(fields[0]), int(fields[1]), float(fields[2]))
+  return (int(int(fields[0])%10),int(int(fields[1])%10)), (int(fields[0]), int(fields[1]), float(fields[2]))
 
 def cf(filename):
   '''
@@ -37,8 +37,8 @@ def cf(filename):
 
   # select training and testing
   numPartitions = 10
-  training    = ratings.filter(lambda r: not(r[0][0]<=2 and r[0][1]<=2) ).values().repartition(numPartitions).cache()
-  test        = ratings.filter(lambda r: r[0][0]<=2 and r[0][1]<=2 ).values().cache()
+  training    = ratings.filter(lambda r: not(r[0][0]<=0 and r[0][1]<=1) ).values().repartition(numPartitions).cache()
+  test        = ratings.filter(lambda r: r[0][0]<=0 and r[0][1]<=1 ).values().cache()
   numTraining = training.count()
   numTest     = test.count()
   print "ratings:\t%d\ntraining:\t%d\ntest:\t\t%d\n" % (ratings.count(), training.count(),test.count())
