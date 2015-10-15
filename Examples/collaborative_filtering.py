@@ -93,6 +93,7 @@ def cf(filename):
 
 if __name__ == '__main__':
   filenames = ['../Data/ml-1m/ratings.dat','../Data/ml-10M100K/ratings.dat']
+  filenames = ['../Data/ml-10M100K/ratings.dat']
   for filename in filenames:
     cf(filename)
 
