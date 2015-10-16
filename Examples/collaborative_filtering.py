@@ -38,7 +38,7 @@ def cf(filename):
   # select training and testing
   numPartitions = 1
   training    = ratings.filter(lambda r: not(r[0][0]<=0 and r[0][1]<=1) ).values().repartition(numPartitions).cache()
-  test        = ratings.filter(lambda r: r[0][0]<=0 and r[0][1]<=1 ).values().cache()
+  test        = ratings.filter(lambda r: r[0][0]<=0 and r[0][1]<=0 ).values().cache()
   numTraining = training.count()
   numTest     = test.count()
   print "ratings:\t%d\ntraining:\t%d\ntest:\t\t%d\n" % (ratings.count(), training.count(),test.count())
@@ -46,7 +46,7 @@ def cf(filename):
   # model training with parameter selection on the validation dataset
   ranks       = [30,20,10]
   lambdas     = [0.1,0.01,0.001]
-  numIters    = [10,20]
+  numIters    = [10,15,20]
   bestModel   = None
   bestValidationRmse = float("inf")
   bestRank    = 0
@@ -59,18 +59,18 @@ def cf(filename):
     validationRmse          = sqrt(predictionsAndRatings.map(lambda x: (x[0] - x[1]) ** 2).reduce(add) / float(numTraining))
     print rank, lmbda, numIter, validationRmse
     if (validationRmse < bestValidationRmse):
-      bestModel = model
       bestValidationRmse = validationRmse
       bestRank = rank
       bestLambda = lmbda
       bestNumIter = numIter
   print bestRank, bestLambda, bestNumIter, bestValidationRmse 
   print "ALS on train:\t\t%.2f" % bestValidationRmse
+
+  bestModel = ALS.train(training, bestRank, bestNumIter, bestLambda)
   
   meanRating = training.map(lambda x: x[2]).mean()
   baselineRmse = sqrt(training.map(lambda x: (meanRating - x[2]) ** 2).reduce(add) / numTraining)
   print "Mean imputation:\t\t%.2f" % baselineRmse
-
 
   # predict test ratings
   try:
