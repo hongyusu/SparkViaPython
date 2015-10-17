@@ -52,7 +52,10 @@ def cf(filename):
   bestRank    = 0
   bestLambda  = -1.0
   bestNumIter = -1
+  i = 0
   for rank, lmbda, numIter in itertools.product(ranks, lambdas, numIters):
+    i+=1
+    if i<=14: continue
     model                   = ALS.train(training, rank, numIter, lmbda)
     predictions             = model.predictAll(training.map(lambda x:(x[0],x[1])))
     predictionsAndRatings   = predictions.map(lambda x:((x[0],x[1]),x[2])).join(training.map(lambda x:((x[0],x[1]),x[2]))).values()
