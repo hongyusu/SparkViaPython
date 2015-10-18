@@ -47,9 +47,6 @@ def cf(filename):
   ranks       = [30,20,10]
   lambdas     = [0.1,0.01,0.001]
   numIters    = [10,15,20]
-  ranks=[30]
-  lambdas=[0.01]
-  numIters=[20]
   bestModel   = None
   bestValidationRmse = float("inf")
   bestRank    = 0
