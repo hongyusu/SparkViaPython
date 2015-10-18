@@ -57,7 +57,6 @@ def svm():
 
   # Evaluating the model on training data
   labelsAndPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
-  print labelsAndPreds.collect()
   trainErr = labelsAndPreds.filter(lambda (v, p): v != p).count() / float(trainSize)
   print trainErr
 
