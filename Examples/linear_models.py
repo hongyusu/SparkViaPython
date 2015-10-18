@@ -19,6 +19,7 @@ def svm():
   # load data from file
   parsedData = MLUtils.loadLibSVMFile(sc, "../spark-1.4.1-bin-hadoop2.6/data/mllib/sample_libsvm_data.txt")
   parsedData = MLUtils.loadLibSVMFile(sc, "../Data/a6a")
+  #parsedData = MLUtils.loadLibSVMFile(sc, "../Data/gisette_scale")
 
   # split data into training and test
   trainingData,testData = parsedData.randomSplit([0.8,0.2])
@@ -27,22 +28,20 @@ def svm():
   print "Training:\t%d\nTest:\t%d" % (trainSize,testSize)
   trainingExamples = trainingData.collect()
   testExamples = testData.collect()
-  print trainingExamples[0]
-  print testExamples[0]
-  
   
   # train a SVM model
-
   numIterValList = [100,200]
   regParamValList = [0.01,0.1,1,10]
   stepSizeValList = [0.1,0.5,1]
   regTypeValList = ['l2','l1']
 
+  # variable for the best parameters
   bestNumIterVal = 0
   bestRegParamVal = 0
   bestStepSizeVal = 0
   bestRegTypeVal = 0
   bestTrainErr = 100
+
   for numIterVal,regParamVal,stepSizeVal,regTypeVal in itertools.product(numIterValList,regParamValList,stepSizeValList,regTypeValList):
     model = SVMWithSGD.train(trainingData, iterations=numIterVal, regParam=regParamVal, step=stepSizeVal, regType=regTypeVal)
     labelsAndPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
@@ -58,12 +57,13 @@ def svm():
 
   # Evaluating the model on training data
   labelsAndPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
-  trainErr = labelsAndPreds.filter(lambda (v, p): v != p).count() / trainSize
-  print trainErr,trainSize
+  print labelsAndPreds.collect()
+  trainErr = labelsAndPreds.filter(lambda (v, p): v != p).count() / float(trainSize)
+  print trainErr
 
   # Evaluating the model on training data
   labelsAndPreds = testData.map(lambda p: (p.label, model.predict(p.features)))
-  testErr = labelsAndPreds.filter(lambda (v, p): v != p).count() / testSize 
+  testErr = labelsAndPreds.filter(lambda (v, p): v != p).count() / float(testSize)
   print testErr
 
   sc.stop()
