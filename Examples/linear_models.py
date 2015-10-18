@@ -8,7 +8,6 @@ def svm():
   '''
   linear svm classifier
   '''
-
   # set up Spark environment
   APP_NAME = "Collaboratove filtering for movie recommendation"
   conf = SparkConf().setAppName(APP_NAME)
@@ -17,7 +16,7 @@ def svm():
   
   # load data from file
   parsedData = MLUtils.loadLibSVMFile(sc, "../spark-1.4.1-bin-hadoop2.6/data/mllib/sample_libsvm_data.txt")
-  #parsedData = MLUtils.loadLibSVMFile(sc, "../Data/a6a")
+  parsedData = MLUtils.loadLibSVMFile(sc, "../Data/a6a")
 
   # split data into training and test
   trainingData,testData = parsedData.randomSplit([0.8,0.2])
@@ -26,18 +25,20 @@ def svm():
   print "Training:\t%d\nTest:\t%d" % (trainSize,testSize)
   
   # train a SVM model
-  numIters = [100,200]
-  regParas = [0.01,0.1,1,10,100]
 
-  numIterVal = 100
-  regParamVal = 0.1
-  stepSizeVal = 0.5
-  model = SVMWithSGD.train(trainingData, numIterations=numIterVal, regParam=regParamVal, stepSize=stepSizeVal)
+  numIterValList = [100,200]
+  regParamValList = [0.01,0.1,1,10]
+  stepSizeValList = [0.1,0.5,1]
+  regTypeValList = ['l2','l1']
+
+  for numIterVal,regParamVal,stepSizeVal,regTypeVal in itertools.product(numIterValList,regParamValList,stepSizeValList,regTypeValList):
+    model = SVMWithSGD.train(trainingData, iterations=numIterVal, regParam=regParamVal, step=stepSizeVal, regType='l2')
+    break
   
   # Evaluating the model on training data
   labelsAndPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
   trainErr = labelsAndPreds.filter(lambda (v, p): v != p).count() / trainSize
-  print trainErr
+  print trainErr,trainSize
 
   # Evaluating the model on training data
   labelsAndPreds = testData.map(lambda p: (p.label, model.predict(p.features)))
