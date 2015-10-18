@@ -52,6 +52,7 @@ def svm():
       bestStepSizeVal = stepSizeVal
       bestRegTypeVal = regTypeVal
       bestTrainErr = trainErr
+    print numIterVal,regParamVal,stepSizeVal,regTypeVal,trainErr
   print bestNumIterVal,bestRegParamVal,bestStepSizeVal,bestRegTypeVal,bestTrainErr
 
   # Evaluating the model on training data
