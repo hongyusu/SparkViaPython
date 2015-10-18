@@ -47,15 +47,15 @@ def cf(filename):
   ranks       = [30,20,10]
   lambdas     = [0.1,0.01,0.001]
   numIters    = [10,15,20]
+  ranks=[30]
+  lambdas=[0.01]
+  numIters=[20]
   bestModel   = None
   bestValidationRmse = float("inf")
   bestRank    = 0
   bestLambda  = -1.0
   bestNumIter = -1
-  i = 0
   for rank, lmbda, numIter in itertools.product(ranks, lambdas, numIters):
-    i+=1
-    if i<=14: continue
     model                   = ALS.train(training, rank, numIter, lmbda)
     predictions             = model.predictAll(training.map(lambda x:(x[0],x[1])))
     predictionsAndRatings   = predictions.map(lambda x:((x[0],x[1]),x[2])).join(training.map(lambda x:((x[0],x[1]),x[2]))).values()
@@ -96,7 +96,7 @@ def cf(filename):
 
 if __name__ == '__main__':
   filenames = ['../Data/ml-1m/ratings.dat','../Data/ml-10M100K/ratings.dat']
-  filenames = ['../Data/ml-10M100K/ratings.dat']
+  filenames = ['../Data/ml-1m/ratings.dat']
   for filename in filenames:
     cf(filename)
 
