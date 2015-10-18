@@ -25,6 +25,9 @@ def svm():
   trainSize = trainingData.count()
   testSize = testData.count()
   print "Training:\t%d\nTest:\t%d" % (trainSize,testSize)
+  examples = trainingData.collect()
+  print examples[2].label
+  return
   
   # train a SVM model
 
@@ -34,7 +37,7 @@ def svm():
   regTypeValList = ['l2','l1']
 
   for numIterVal,regParamVal,stepSizeVal,regTypeVal in itertools.product(numIterValList,regParamValList,stepSizeValList,regTypeValList):
-    model = SVMWithSGD.train(trainingData, iterations=numIterVal, regParam=regParamVal, step=stepSizeVal, regType='l2')
+    model = SVMWithSGD.train(trainingData, iterations=numIterVal, regParam=regParamVal, step=stepSizeVal, regType=regTypeVal)
     break
   
   # Evaluating the model on training data
