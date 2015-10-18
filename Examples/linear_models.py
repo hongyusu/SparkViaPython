@@ -17,18 +17,25 @@ def svm():
   
   # load data from file
   parsedData = MLUtils.loadLibSVMFile(sc, "../spark-1.4.1-bin-hadoop2.6/data/mllib/sample_libsvm_data.txt")
-  examples = parsedData.collect()
-  print examples[0].label
-  print examples[0].features
-  print examples[0].features.size
 
+  # split data into training and test
+  train,test = parsedData.randomSplit([0.6,0.4])
+  trainSize = train.count()
+  testSize = test.count()
+  print "Training:\t%d\nTest:\t%d" % (trainSize,testSize)
+  
   # train a SVM model
-  model = SVMWithSGD.train(parsedData, iterations=100)
+  model = SVMWithSGD.train(train, iterations=100)
   
   # Evaluating the model on training data
-  labelsAndPreds = parsedData.map(lambda p: (p.label, model.predict(p.features)))
-  trainErr = labelsAndPreds.filter(lambda (v, p): v != p).count() / float(parsedData.count())
-  print("Training Error = " + str(trainErr))
+  labelsAndPreds = train.map(lambda p: (p.label, model.predict(p.features)))
+  trainErr = labelsAndPreds.filter(lambda (v, p): v != p).count() / trainSize
+  print trainErr
+
+  # Evaluating the model on training data
+  labelsAndPreds = test.map(lambda p: (p.label, model.predict(p.features)))
+  testErr = labelsAndPreds.filter(lambda (v, p): v != p).count() / testSize 
+  print testErr
 
   sc.stop()
   
