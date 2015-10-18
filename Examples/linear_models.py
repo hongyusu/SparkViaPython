@@ -25,9 +25,11 @@ def svm():
   trainSize = trainingData.count()
   testSize = testData.count()
   print "Training:\t%d\nTest:\t%d" % (trainSize,testSize)
-  examples = trainingData.collect()
-  print examples[2].label
-  return
+  trainingExamples = trainingData.collect()
+  testExamples = testData.collect()
+  print trainingExamples[0]
+  print testExamples[0]
+  
   
   # train a SVM model
 
@@ -36,10 +38,24 @@ def svm():
   stepSizeValList = [0.1,0.5,1]
   regTypeValList = ['l2','l1']
 
+  bestNumIterVal = 0
+  bestRegParamVal = 0
+  bestStepSizeVal = 0
+  bestRegTypeVal = 0
+  bestTrainErr = 100
   for numIterVal,regParamVal,stepSizeVal,regTypeVal in itertools.product(numIterValList,regParamValList,stepSizeValList,regTypeValList):
     model = SVMWithSGD.train(trainingData, iterations=numIterVal, regParam=regParamVal, step=stepSizeVal, regType=regTypeVal)
+    labelsAndPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
+    trainErr = labelsAndPreds.filter(lambda (v, p): v != p).count() / trainSize
+    if trainErr<bestTrainErr:
+      bestNumIterVal = numIterVal
+      bestRegParamVal = regParamVal
+      bestStepSizeVal = stepSizeVal
+      bestRegTypeVal = regTypeVal
+      bestTrainErr = trainErr
     break
-  
+  print bestNumIterVal,bestRegParamVal,bestStepSizeVal,bestRegTypeVal,bestTrainErr
+
   # Evaluating the model on training data
   labelsAndPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
   trainErr = labelsAndPreds.filter(lambda (v, p): v != p).count() / trainSize
