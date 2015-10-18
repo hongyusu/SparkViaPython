@@ -82,7 +82,7 @@ def lr(trainingData,testData,trainingSize,testSize):
     print numIterVal,regParamVal,stepSizeVal,regTypeVal,trainErr
   print bestNumIterVal,bestRegParamVal,bestStepSizeVal,bestRegTypeVal,bestTrainErr
 
-  model = LogisticRegressionWithLBFGS.train(trainingData, iterations=bestNumIterVal, regParam=bestRegParamVal, step=bestStepSizeVal, regType=bestRegTypeVal)
+  model = LogisticRegressionWithSGD.train(trainingData, iterations=bestNumIterVal, regParam=bestRegParamVal, step=bestStepSizeVal, regType=bestRegTypeVal)
 
   # Evaluating the model on training data
   labelsAndPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
