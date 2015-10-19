@@ -15,8 +15,8 @@ def linearRegression(trainingData,testData,trainingSize,testSize):
   linear lr classifier
   '''
   # train a lr model
-  numIterValList = [100,200,500]
-  stepSizeValList = [1e-10,1e-5,0.001,0.1,1]
+  numIterValList = [1000,3000,5000]
+  stepSizeValList = [1e-11,1e-9,1e-7,1e-5]
 
   # variable for the best parameters
   bestNumIterVal = 200
@@ -29,15 +29,13 @@ def linearRegression(trainingData,testData,trainingSize,testSize):
   for numIterVal,stepSizeVal in itertools.product(numIterValList,stepSizeValList):
     model = LinearRegressionWithSGD.train(trainingData, iterations=numIterVal, step=stepSizeVal, regParam=regParamVal, regType=regTypeVal)
     ValsAndPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
-    print ValsAndPreds.collect()
     trainingRMSE = math.sqrt(ValsAndPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / trainingSize)
-    if TrainingRMSE:
+    if trainingRMSE:
       if trainingRMSE<bestTrainingRMSE:
         bestNumIterVal = numIterVal
         bestStepSizeVal = stepSizeVal
         bestTrainingRMSE = trainingRMSE
     print numIterVal,stepSizeVal,trainingRMSE
-    break
   print bestNumIterVal,bestStepSizeVal,bestTrainingRMSE
 
   model = LinearRegressionWithSGD.train(trainingData, iterations=bestNumIterVal, step=bestStepSizeVal, regParam=regParamVal, regType=regTypeVal)
@@ -79,6 +77,8 @@ if __name__ == '__main__':
   #print trainingExamples[0].features
 
   linearRegression(trainingData,testData,trainingSize,testSize)
+  #lassoRegression(trainingData,testData,trainingSize,testSize)
+  #ridgeRegression(trainingData,testData,trainingSize,testSize)
 
   sc.stop()
 
