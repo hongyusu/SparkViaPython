@@ -8,6 +8,7 @@ from pyspark.mllib.regression import LabeledPoint
 from pyspark.mllib.util import MLUtils
 import itertools
 import math
+import random
 
   
 def leastSquare(trainingData,testData,trainingSize,testSize):
@@ -56,8 +57,8 @@ def regularized(trainingData,testData,trainingSize,testSize,regTypeVal):
   Least square with l1 norm: lasso
   '''
   # train a lr model
-  numIterValList = [3000,5000]
-  stepSizeValList = [1e-11,1e-9,1e-7]
+  numIterValList = [3000,5000,10000]
+  stepSizeValList = [1e-11,1e-9,1e-7,1e-5,1e-3,1e-1]
   regParamValList = [0.01,0.1,1,10]
 
   # variable for the best parameters
@@ -69,8 +70,6 @@ def regularized(trainingData,testData,trainingSize,testSize,regTypeVal):
   for numIterVal,stepSizeVal,regParamVal in itertools.product(numIterValList,stepSizeValList,regParamValList):
     model = LinearRegressionWithSGD.train(trainingData, iterations=numIterVal, step=stepSizeVal, regParam=regParamVal, regType=regTypeVal)
     ValsAndPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
-    print ValsAndPreds.collect()
-    return
     trainingRMSE = math.sqrt(ValsAndPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / trainingSize)
     if trainingRMSE:
       if trainingRMSE<bestTrainingRMSE:
@@ -97,6 +96,8 @@ def regularized(trainingData,testData,trainingSize,testSize,regTypeVal):
 
 if __name__ == '__main__':
 
+  random.seed(1)
+
   # set up Spark environment
   APP_NAME = "Spark linear regression models"
   conf = SparkConf().setAppName(APP_NAME)
@@ -119,7 +120,6 @@ if __name__ == '__main__':
   #print trainingExamples[0].features
 
   #leastSquare(trainingData,testData,trainingSize,testSize)
-  regularized(trainingData,testData,trainingSize,testSize,None)
   regularized(trainingData,testData,trainingSize,testSize,'l1')
   regularized(trainingData,testData,trainingSize,testSize,'l2')
 
