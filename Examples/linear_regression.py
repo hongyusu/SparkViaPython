@@ -56,9 +56,9 @@ def regularized(trainingData,testData,trainingSize,testSize,regTypeVal):
   Least square with l1 norm: lasso
   '''
   # train a lr model
-  numIterValList = [1000,3000,5000]
-  stepSizeValList = [1e-11,1e-9,1e-7,1e-5]
-  regParamValList = [0.01,0.1,1,10,100]
+  numIterValList = [3000,5000]
+  stepSizeValList = [1e-11,1e-9,1e-7]
+  regParamValList = [0.01,0.1,1,10]
 
   # variable for the best parameters
   bestNumIterVal = 200
@@ -76,7 +76,7 @@ def regularized(trainingData,testData,trainingSize,testSize,regTypeVal):
         bestStepSizeVal = stepSizeVal
         bestTrainingRMSE = trainingRMSE
     print numIterVal,stepSizeVal,regParamVal,trainingRMSE
-  print bestNumIterVal,bestStepSizeVal,bestTrainingRMSE
+  print bestNumIterVal,bestStepSizeVal,bestRegParamVal,bestTrainingRMSE
 
   model = LinearRegressionWithSGD.train(trainingData, iterations=bestNumIterVal, step=bestStepSizeVal, regParam=regParamVal, regType=regTypeVal)
 
@@ -102,8 +102,8 @@ if __name__ == '__main__':
   sc = SparkContext(conf=conf)
   
   # load data from file
-  #parsedData = MLUtils.loadLibSVMFile(sc, "../spark-1.4.1-bin-hadoop2.6/data/mllib/sample_libsvm_data.txt")
   parsedData = MLUtils.loadLibSVMFile(sc, "../Data/cadata")
+  parsedData = MLUtils.loadLibSVMFile(sc, "../Data/YearPredictionMSD")
 
   # split data into training and test
   trainingData,testData = parsedData.randomSplit([0.8,0.2])
