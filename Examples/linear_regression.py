@@ -69,6 +69,8 @@ def regularized(trainingData,testData,trainingSize,testSize,regTypeVal):
   for numIterVal,stepSizeVal,regParamVal in itertools.product(numIterValList,stepSizeValList,regParamValList):
     model = LinearRegressionWithSGD.train(trainingData, iterations=numIterVal, step=stepSizeVal, regParam=regParamVal, regType=regTypeVal)
     ValsAndPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
+    print ValsAndPreds.collect()
+    return
     trainingRMSE = math.sqrt(ValsAndPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / trainingSize)
     if trainingRMSE:
       if trainingRMSE<bestTrainingRMSE:
