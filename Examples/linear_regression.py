@@ -119,6 +119,7 @@ if __name__ == '__main__':
   #print trainingExamples[0].features
 
   #leastSquare(trainingData,testData,trainingSize,testSize)
+  regularized(trainingData,testData,trainingSize,testSize,None)
   regularized(trainingData,testData,trainingSize,testSize,'l1')
   regularized(trainingData,testData,trainingSize,testSize,'l2')
 
