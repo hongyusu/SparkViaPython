@@ -36,7 +36,7 @@ def linearRegression(trainingData,testData,trainingSize,testSize):
       bestTrainingRMSE = trainingRMSE
     print numIterVal,stepSizeVal,trainingRMSE
     break
-  print bestNumIterVal,bestRegParamVal,bestStepSizeVal,bestRegTypeVal,bestTrainErr
+  print bestNumIterVal,bestStepSizeVal,bestTrainingRMSE
 
   model = LinearRegressionWithSGD.train(trainingData, iterations=bestNumIterVal, step=bestStepSizeVal, regParam=regParamVal, regType=regTypeVal)
 
@@ -46,9 +46,9 @@ def linearRegression(trainingData,testData,trainingSize,testSize):
   print trainingRMSE
 
   # Evaluating the model on training data
-  labelsAndPreds = testData.map(lambda p: (p.label, model.predict(p.features)))
-  testErr = labelsAndPreds.filter(lambda (v, p): v != p).count() / float(testSize)
-  print testErr
+  ValsandPreds = testData.map(lambda p: (p.label, model.predict(p.features)))
+  trainingRMSE = math.sqrt(valuesAndPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / testSize)
+  print testRMSE
   pass
 
 
