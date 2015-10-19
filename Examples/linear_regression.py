@@ -15,13 +15,13 @@ def linearRegression(trainingData,testData,trainingSize,testSize):
   linear lr classifier
   '''
   # train a lr model
-  numIterValList = [100,200]
-  stepSizeValList = [0.1,0.5,1]
+  numIterValList = [100,200,500]
+  stepSizeValList = [1e-10,1e-5,0.001,0.1,1]
 
   # variable for the best parameters
   bestNumIterVal = 200
   bestStepSizeVal = 1
-  bestTrainingRMSE = 100
+  bestTrainingRMSE = 1e10 
 
   regParamVal = 0.0
   regTypeVal = None
@@ -29,11 +29,13 @@ def linearRegression(trainingData,testData,trainingSize,testSize):
   for numIterVal,stepSizeVal in itertools.product(numIterValList,stepSizeValList):
     model = LinearRegressionWithSGD.train(trainingData, iterations=numIterVal, step=stepSizeVal, regParam=regParamVal, regType=regTypeVal)
     ValsAndPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
+    print ValsAndPreds.collect()
     trainingRMSE = math.sqrt(ValsAndPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / trainingSize)
-    if trainingRMSE<bestTrainingRMSE:
-      bestNumIterVal = numIterVal
-      bestStepSizeVal = stepSizeVal
-      bestTrainingRMSE = trainingRMSE
+    if TrainingRMSE:
+      if trainingRMSE<bestTrainingRMSE:
+        bestNumIterVal = numIterVal
+        bestStepSizeVal = stepSizeVal
+        bestTrainingRMSE = trainingRMSE
     print numIterVal,stepSizeVal,trainingRMSE
     break
   print bestNumIterVal,bestStepSizeVal,bestTrainingRMSE
@@ -47,7 +49,7 @@ def linearRegression(trainingData,testData,trainingSize,testSize):
 
   # Evaluating the model on training data
   ValsAndPreds = testData.map(lambda p: (p.label, model.predict(p.features)))
-  trainingRMSE = math.sqrt(ValsAndPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / testSize)
+  testRMSE = math.sqrt(ValsAndPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / testSize)
   print testRMSE
   pass
 
@@ -70,9 +72,12 @@ if __name__ == '__main__':
   trainingSize = trainingData.count()
   testSize = testData.count()
   print "Training:\t%d\nTest:\t%d" % (trainingSize,testSize)
-  trainingExamples = trainingData.collect()
-  testExamples = testData.collect()
- 
+
+  #trainingExamples = trainingData.collect()
+  #testExamples = testData.collect()
+  #print trainingExamples[0].label
+  #print trainingExamples[0].features
+
   linearRegression(trainingData,testData,trainingSize,testSize)
 
   sc.stop()
