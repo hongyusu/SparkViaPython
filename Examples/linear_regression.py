@@ -28,8 +28,8 @@ def linearRegression(trainingData,testData,trainingSize,testSize):
 
   for numIterVal,stepSizeVal in itertools.product(numIterValList,stepSizeValList):
     model = LinearRegressionWithSGD.train(trainingData, iterations=numIterVal, step=stepSizeVal, regParam=regParamVal, regType=regTypeVal)
-    ValsandPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
-    trainingRMSE = math.sqrt(ValsandPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / trainingSize)
+    ValsAndPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
+    trainingRMSE = math.sqrt(ValsAndPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / trainingSize)
     if trainingRMSE<bestTrainingRMSE:
       bestNumIterVal = numIterVal
       bestStepSizeVal = stepSizeVal
@@ -41,13 +41,13 @@ def linearRegression(trainingData,testData,trainingSize,testSize):
   model = LinearRegressionWithSGD.train(trainingData, iterations=bestNumIterVal, step=bestStepSizeVal, regParam=regParamVal, regType=regTypeVal)
 
   # Evaluating the model on training data
-  ValsandPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
-  trainingRMSE = math.sqrt(valuesAndPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / trainingSize)
+  ValsAndPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
+  trainingRMSE = math.sqrt(ValsAndPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / trainingSize)
   print trainingRMSE
 
   # Evaluating the model on training data
-  ValsandPreds = testData.map(lambda p: (p.label, model.predict(p.features)))
-  trainingRMSE = math.sqrt(valuesAndPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / testSize)
+  ValsAndPreds = testData.map(lambda p: (p.label, model.predict(p.features)))
+  trainingRMSE = math.sqrt(ValsAndPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / testSize)
   print testRMSE
   pass
 
