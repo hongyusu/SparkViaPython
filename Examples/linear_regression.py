@@ -51,7 +51,7 @@ def leastSquare(trainingData,testData,trainingSize,testSize):
   print testRMSE
   pass
 
-def lasso(trainingData,testData,trainingSize,testSize):
+def regularized(trainingData,testData,trainingSize,testSize,regTypeVal):
   '''
   Least square with l1 norm: lasso
   '''
@@ -66,8 +66,6 @@ def lasso(trainingData,testData,trainingSize,testSize):
   bestTrainingRMSE = 1e10 
   bestRegParamVal = 0.0
 
-  regTypeVal = 'l1'
-
   for numIterVal,stepSizeVal,regParamVal in itertools.product(numIterValList,stepSizeValList,regParamValList):
     model = LinearRegressionWithSGD.train(trainingData, iterations=numIterVal, step=stepSizeVal, regParam=regParamVal, regType=regTypeVal)
     ValsAndPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
@@ -77,7 +75,7 @@ def lasso(trainingData,testData,trainingSize,testSize):
         bestNumIterVal = numIterVal
         bestStepSizeVal = stepSizeVal
         bestTrainingRMSE = trainingRMSE
-    print numIterVal,stepSizeVal,trainingRMSE
+    print numIterVal,stepSizeVal,regParamVal,trainingRMSE
   print bestNumIterVal,bestStepSizeVal,bestTrainingRMSE
 
   model = LinearRegressionWithSGD.train(trainingData, iterations=bestNumIterVal, step=bestStepSizeVal, regParam=regParamVal, regType=regTypeVal)
@@ -119,8 +117,8 @@ if __name__ == '__main__':
   #print trainingExamples[0].features
 
   #leastSquare(trainingData,testData,trainingSize,testSize)
-  lasso(trainingData,testData,trainingSize,testSize)
-  #ridgeRegression(trainingData,testData,trainingSize,testSize)
+  regularized(trainingData,testData,trainingSize,testSize,'l1')
+  regularized(trainingData,testData,trainingSize,testSize,'l2')
 
   sc.stop()
 
