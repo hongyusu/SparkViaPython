@@ -10,7 +10,7 @@ import itertools
 import math
 
   
-def linearRegression(trainingData,testData,trainingSize,testSize):
+def leastSquare(trainingData,testData,trainingSize,testSize):
   '''
   linear lr classifier
   '''
@@ -27,6 +27,48 @@ def linearRegression(trainingData,testData,trainingSize,testSize):
   regTypeVal = None
 
   for numIterVal,stepSizeVal in itertools.product(numIterValList,stepSizeValList):
+    model = LinearRegressionWithSGD.train(trainingData, iterations=numIterVal, step=stepSizeVal, regParam=regParamVal, regType=regTypeVal)
+    ValsAndPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
+    trainingRMSE = math.sqrt(ValsAndPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / trainingSize)
+    if trainingRMSE:
+      if trainingRMSE<bestTrainingRMSE:
+        bestNumIterVal = numIterVal
+        bestStepSizeVal = stepSizeVal
+        bestTrainingRMSE = trainingRMSE
+    print numIterVal,stepSizeVal,trainingRMSE
+  print bestNumIterVal,bestStepSizeVal,bestTrainingRMSE
+
+  model = LinearRegressionWithSGD.train(trainingData, iterations=bestNumIterVal, step=bestStepSizeVal, regParam=regParamVal, regType=regTypeVal)
+
+  # Evaluating the model on training data
+  ValsAndPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
+  trainingRMSE = math.sqrt(ValsAndPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / trainingSize)
+  print trainingRMSE
+
+  # Evaluating the model on training data
+  ValsAndPreds = testData.map(lambda p: (p.label, model.predict(p.features)))
+  testRMSE = math.sqrt(ValsAndPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / testSize)
+  print testRMSE
+  pass
+
+def lasso(trainingData,testData,trainingSize,testSize):
+  '''
+  Least square with l1 norm: lasso
+  '''
+  # train a lr model
+  numIterValList = [1000,3000,5000]
+  stepSizeValList = [1e-11,1e-9,1e-7,1e-5]
+  regParamValList = [0.01,0.1,1,10,100]
+
+  # variable for the best parameters
+  bestNumIterVal = 200
+  bestStepSizeVal = 1
+  bestTrainingRMSE = 1e10 
+  bestRegParamVal = 0.0
+
+  regTypeVal = 'l1'
+
+  for numIterVal,stepSizeVal,regParamVal in itertools.product(numIterValList,stepSizeValList,regParamValList):
     model = LinearRegressionWithSGD.train(trainingData, iterations=numIterVal, step=stepSizeVal, regParam=regParamVal, regType=regTypeVal)
     ValsAndPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
     trainingRMSE = math.sqrt(ValsAndPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / trainingSize)
@@ -76,8 +118,8 @@ if __name__ == '__main__':
   #print trainingExamples[0].label
   #print trainingExamples[0].features
 
-  linearRegression(trainingData,testData,trainingSize,testSize)
-  #lassoRegression(trainingData,testData,trainingSize,testSize)
+  #leastSquare(trainingData,testData,trainingSize,testSize)
+  lasso(trainingData,testData,trainingSize,testSize)
   #ridgeRegression(trainingData,testData,trainingSize,testSize)
 
   sc.stop()
