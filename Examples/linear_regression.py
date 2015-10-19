@@ -1,93 +1,51 @@
 
 
-import itertools
 from pyspark import SparkConf, SparkContext
 from pyspark.mllib.classification import SVMWithSGD, SVMModel
 from pyspark.mllib.classification import LogisticRegressionWithSGD, LogisticRegressionModel
+from pyspark.mllib.regression import  LinearRegressionWithSGD, LinearRegressionModel
 from pyspark.mllib.regression import LabeledPoint
 from pyspark.mllib.util import MLUtils
-
-def svm(trainingData,testData,trainingSize,testSize):
-  '''
-  linear svm classifier
-  '''
-  # train a SVM model
-  numIterValList = [100,200]
-  regParamValList = [0.01,0.1,1,10,100]
-  stepSizeValList = [0.1,0.5,1]
-  regTypeValList = ['l2','l1']
-
-  # variable for the best parameters
-  bestNumIterVal = 200
-  bestRegParamVal = 0.01
-  bestStepSizeVal = 1
-  bestRegTypeVal = 'l2'
-  bestTrainErr = 100
-
-  for numIterVal,regParamVal,stepSizeVal,regTypeVal in itertools.product(numIterValList,regParamValList,stepSizeValList,regTypeValList):
-    break
-    model = SVMWithSGD.train(trainingData, iterations=numIterVal, regParam=regParamVal, step=stepSizeVal, regType=regTypeVal)
-    labelsAndPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
-    trainErr = labelsAndPreds.filter(lambda (v, p): v != p).count() / float(trainingSize)
-    if trainErr<bestTrainErr:
-      bestNumIterVal = numIterVal
-      bestRegParamVal = regParamVal
-      bestStepSizeVal = stepSizeVal
-      bestRegTypeVal = regTypeVal
-      bestTrainErr = trainErr
-    print numIterVal,regParamVal,stepSizeVal,regTypeVal,trainErr
-  print bestNumIterVal,bestRegParamVal,bestStepSizeVal,bestRegTypeVal,bestTrainErr
-
-  model = SVMWithSGD.train(trainingData, iterations=bestNumIterVal, regParam=bestRegParamVal, step=bestStepSizeVal, regType=bestRegTypeVal)
-
-  # Evaluating the model on training data
-  labelsAndPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
-  trainErr = labelsAndPreds.filter(lambda (v, p): v != p).count() / float(trainingSize)
-  print trainErr
-
-  # Evaluating the model on training data
-  labelsAndPreds = testData.map(lambda p: (p.label, model.predict(p.features)))
-  testErr = labelsAndPreds.filter(lambda (v, p): v != p).count() / float(testSize)
-  print testErr
-  pass
+import itertools
+import math
 
   
-def lr(trainingData,testData,trainingSize,testSize):
+def linearRegression(trainingData,testData,trainingSize,testSize):
   '''
   linear lr classifier
   '''
   # train a lr model
   numIterValList = [100,200]
-  regParamValList = [0.01,0.1,1,10,100]
   stepSizeValList = [0.1,0.5,1]
-  regTypeValList = ['l2','l1']
 
   # variable for the best parameters
   bestNumIterVal = 200
-  bestRegParamVal = 0.01
   bestStepSizeVal = 1
-  bestRegTypeVal = 'l2'
-  bestTrainErr = 100
+  bestTrainingRMSE = 100
 
-  for numIterVal,regParamVal,stepSizeVal,regTypeVal in itertools.product(numIterValList,regParamValList,stepSizeValList,regTypeValList):
-    model = LogisticRegressionWithSGD.train(trainingData, iterations=numIterVal, regParam=regParamVal, step=stepSizeVal, regType=regTypeVal)
-    labelsAndPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
-    trainErr = labelsAndPreds.filter(lambda (v, p): v != p).count() / float(trainingSize)
-    if trainErr<bestTrainErr:
+  regParamVal = 0.0
+  regTypeVal = None
+
+  for numIterVal,stepSizeVal in itertools.product(numIterValList,stepSizeValList):
+    model = LinearRegressionWithSGD.train(trainingData, iterations=numIterVal, step=stepSizeVal, regParam=regParamVal, regType=regTypeVal)
+    ValsandPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
+    trainingRMSE = math.sqrt(ValsandPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / trainingSize)
+    if trainingRMSE<bestTrainErr:
       bestNumIterVal = numIterVal
       bestRegParamVal = regParamVal
       bestStepSizeVal = stepSizeVal
       bestRegTypeVal = regTypeVal
-      bestTrainErr = trainErr
+      bestTrainingRMSE = trainingRMSE
     print numIterVal,regParamVal,stepSizeVal,regTypeVal,trainErr
+    break
   print bestNumIterVal,bestRegParamVal,bestStepSizeVal,bestRegTypeVal,bestTrainErr
 
-  model = LogisticRegressionWithSGD.train(trainingData, iterations=bestNumIterVal, regParam=bestRegParamVal, step=bestStepSizeVal, regType=bestRegTypeVal)
+  model = LinearRegressionWithSGD.train(trainingData, iterations=bestNumIterVal, step=bestStepSizeVal, regParam=regParamVal, regType=regTypeVal)
 
   # Evaluating the model on training data
-  labelsAndPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
-  trainErr = labelsAndPreds.filter(lambda (v, p): v != p).count() / float(trainingSize)
-  print trainErr
+  ValsandPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
+  trainingRMSE = math.sqrt(valuesAndPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / trainingSize)
+  print trainingRMSE
 
   # Evaluating the model on training data
   labelsAndPreds = testData.map(lambda p: (p.label, model.predict(p.features)))
@@ -106,9 +64,8 @@ if __name__ == '__main__':
   sc = SparkContext(conf=conf)
   
   # load data from file
-  parsedData = MLUtils.loadLibSVMFile(sc, "../spark-1.4.1-bin-hadoop2.6/data/mllib/sample_libsvm_data.txt")
-  parsedData = MLUtils.loadLibSVMFile(sc, "../Data/a6a")
-  #parsedData = MLUtils.loadLibSVMFile(sc, "../Data/gisette_scale")
+  #parsedData = MLUtils.loadLibSVMFile(sc, "../spark-1.4.1-bin-hadoop2.6/data/mllib/sample_libsvm_data.txt")
+  parsedData = MLUtils.loadLibSVMFile(sc, "../Data/cadata")
 
   # split data into training and test
   trainingData,testData = parsedData.randomSplit([0.8,0.2])
@@ -118,8 +75,7 @@ if __name__ == '__main__':
   trainingExamples = trainingData.collect()
   testExamples = testData.collect()
  
-  #svm(trainingData,testData,trainingSize,testSize)
-  lr(trainingData,testData,trainingSize,testSize)
+  linearRegression(trainingData,testData,trainingSize,testSize)
 
   sc.stop()
 
