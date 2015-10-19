@@ -100,7 +100,7 @@ def lr(trainingData,testData,trainingSize,testSize):
 if __name__ == '__main__':
 
   # set up Spark environment
-  APP_NAME = "Collaboratove filtering for movie recommendation"
+  APP_NAME = "Spark linear classification models"
   conf = SparkConf().setAppName(APP_NAME)
   conf = conf.setMaster('spark://ukko160:7077')
   sc = SparkContext(conf=conf)

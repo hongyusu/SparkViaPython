@@ -30,13 +30,11 @@ def linearRegression(trainingData,testData,trainingSize,testSize):
     model = LinearRegressionWithSGD.train(trainingData, iterations=numIterVal, step=stepSizeVal, regParam=regParamVal, regType=regTypeVal)
     ValsandPreds = trainingData.map(lambda p: (p.label, model.predict(p.features)))
     trainingRMSE = math.sqrt(ValsandPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / trainingSize)
-    if trainingRMSE<bestTrainErr:
+    if trainingRMSE<bestTrainingRMSE:
       bestNumIterVal = numIterVal
-      bestRegParamVal = regParamVal
       bestStepSizeVal = stepSizeVal
-      bestRegTypeVal = regTypeVal
       bestTrainingRMSE = trainingRMSE
-    print numIterVal,regParamVal,stepSizeVal,regTypeVal,trainErr
+    print numIterVal,stepSizeVal,trainingRMSE
     break
   print bestNumIterVal,bestRegParamVal,bestStepSizeVal,bestRegTypeVal,bestTrainErr
 
@@ -58,7 +56,7 @@ def linearRegression(trainingData,testData,trainingSize,testSize):
 if __name__ == '__main__':
 
   # set up Spark environment
-  APP_NAME = "Collaboratove filtering for movie recommendation"
+  APP_NAME = "Spark linear regression models"
   conf = SparkConf().setAppName(APP_NAME)
   conf = conf.setMaster('spark://ukko160:7077')
   sc = SparkContext(conf=conf)
