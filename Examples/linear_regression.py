@@ -118,13 +118,28 @@ def decisionTreeRegression(trainingData,testData,trainingSize,testSize):
         bestMaxBinsVal = maxBinsVal
         bestTrainingRMSE = trainingRMSE
     print maxDepthVal, maxBinsVal, trainingRMSE
-    break
   print bestMaxDepthVal,bestMaxBinsVal,bestTrainingRMSE
+
+  model = DecisionTree.trainRegressor(trainingData,categoricalFeaturesInfo={},impurity='variance',maxDepth=bestMaxDepthVal,maxBins=bestMaxBinsVal)
+
+  # evaluating the model on training data
+  predictions = model.predict(trainingData.map(lambda x:x.features))
+  ValsAndPreds = trainingData.map(lambda x:x.label).zip(predictions)
+  trainingRMSE = math.sqrt(ValsAndPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / trainingSize)
+  print trainingRMSE
+
+  # evaluating the model on test data
+  predictions = model.predict(testData.map(lambda x:x.features))
+  ValsAndPreds = testData.map(lambda x:x.label).zip(predictions)
+  testRMSE = math.sqrt(ValsAndPreds.map(lambda (v, p): (v - p)**2).reduce(lambda x, y: x + y) / testSize)
+  print testRMSE
+
 
   pass
 
 if __name__ == '__main__':
 
+  # generate seed for random number generator
   random.seed(1)
 
   # set up Spark environment
