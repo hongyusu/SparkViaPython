@@ -117,7 +117,7 @@ def decisionTreeRegression(trainingData,testData,trainingSize,testSize):
         bestMaxDepthVal = maxDepthVal
         bestMaxBinsVal = maxBinsVal
         bestTrainingRMSE = trainingRMSE
-    print maxDepth, maxBins, trainingRMSE
+    print maxDepthVal, maxBinsVal, trainingRMSE
     break
   print bestMaxDepthVal,bestMaxBinsVal,bestTrainingRMSE
 
@@ -141,7 +141,7 @@ if __name__ == '__main__':
   trainingData,testData = parsedData.randomSplit([0.8,0.2])
   trainingSize = trainingData.count()
   testSize = testData.count()
-  print "Training:\t%d\nTest:\t%d" % (trainingSize,testSize)
+  print "Training:\t%d\nTest:\t\t%d" % (trainingSize,testSize)
 
   #trainingExamples = trainingData.collect()
   #testExamples = testData.collect()
