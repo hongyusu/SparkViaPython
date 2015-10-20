@@ -107,7 +107,7 @@ def decisionTreeRegression(trainingData,testData,trainingSize,testSize):
   bestMaxBinsVal = 16
   bestTrainingRMSE = 1e10
 
-  for maxDepthVal,maxbinVal in itertools.product(maxDepthValList,maxBinsVal):
+  for maxDepthVal,maxBinsVal in itertools.product(maxDepthValList,maxBinsVal):
     model = DecisionTree.trainRegressor(trainingData,categoricalFeaturesInfo={},impurity='variance',maxDepth=maxDepthVal,maxBins=maxBinsVal)
     predictions = model.predict(trainingData.map(lambda x:x.features))
     ValsAndPreds = trainingData.map(lambda x:x.label).zip(predictions)
