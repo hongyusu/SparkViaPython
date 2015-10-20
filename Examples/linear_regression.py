@@ -99,7 +99,7 @@ def decisionTreeRegression(trainingData,testData,trainingSize,testSize):
   decision tree for regression
   '''
   # parameter range
-  maxDepthValList = [5,10,15]
+  maxDepthValList = [10,20,30]
   maxBinsVal = [16,24,32]
 
   # best parameters
