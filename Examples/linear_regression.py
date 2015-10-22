@@ -144,7 +144,7 @@ def randomForestRegression(trainingData,testData,trainingSize,testSize):
   # parameter range
   maxDepthValList = [10,20,30]
   maxBinsValList = [16,24,32]
-  numTreesValList = [10,30,50]
+  numTreesValList = [10,20,30]
 
   # best parameters
   bestMaxDepthVal = 10
@@ -194,7 +194,7 @@ if __name__ == '__main__':
   
   # load data from file
   parsedData = MLUtils.loadLibSVMFile(sc, "../Data/cadata")
-  #parsedData = MLUtils.loadLibSVMFile(sc, "../Data/YearPredictionMSD")
+  parsedData = MLUtils.loadLibSVMFile(sc, "../Data/YearPredictionMSD")
 
   # split data into training and test
   trainingData,testData = parsedData.randomSplit([0.8,0.2])
