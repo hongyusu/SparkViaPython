@@ -142,7 +142,7 @@ def randomForestRegression(trainingData,testData,trainingSize,testSize):
   random forest for regression
   '''
   # parameter range
-  maxDepthValList = [10,20,30]
+  maxDepthValList = [30]
   maxBinsValList = [16,24,32]
   numTreesValList = [10,20,30]
 
