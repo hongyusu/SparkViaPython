@@ -14,13 +14,12 @@ def statistics():
   # configuration
   APP_NAME = 'statistics'
   conf = SparkConf().setAppName(APP_NAME)
-  #conf = conf.setMaster('spark://ukko160:7077')
-  conf = conf.setMaster('local[2]')
+  conf = conf.setMaster('spark://ukko160:7077')
   sc = SparkContext(conf=conf)
 
   # actuall lambda
-  lines = sc.textFile('../spark-1.4.1-bin-hadoop2.6/README.md')
-  lineLength = lines.map(lambda s: len(s))
+  lines = sc.textFile('./campanja_work_sample_data_customerA.csv')
+  lineLength = lines.map(lambda s: 1 )
   totalLength = lineLength.reduce(lambda a,b: a+b)
   return totalLength
   pass
@@ -28,4 +27,5 @@ def statistics():
 
 
 if __name__ == '__main__':
-  statistics()
+  totalLength = statistics()
+  print '----',totalLength
