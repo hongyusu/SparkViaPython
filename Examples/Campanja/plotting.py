@@ -113,9 +113,9 @@ def basic_statistics_and_plotting(lines):
   subplot.set_zlabel('Date')
   plt.tight_layout()
   try:
-    plt.savefig('%s.png' % (inspect.stack()[0][3]))  #plt.show()
+    plt.savefig('./Results/%s.png' % (inspect.stack()[0][3]))  #plt.show()
   except:
-    plt.savefig('basic_statistics_and_plotting.png')
+    plt.savefig('./Results/basic_statistics_and_plotting.png')
   pass
 
 
@@ -153,9 +153,9 @@ def plot_global_as_time_1(lines):
         for label in legend.get_texts(): label.set_fontsize('small')
   plt.tight_layout()
   try:
-    plt.savefig('%s.png' % (inspect.stack()[0][3]))  #plt.show()
+    plt.savefig('./Results/%s.png' % (inspect.stack()[0][3]))  #plt.show()
   except:
-    plt.savefig('plot_global_as_time_1.png')
+    plt.savefig('./Results/plot_global_as_time_1.png')
   pass
 
 def plot_global_as_time_2(lines):
@@ -207,9 +207,9 @@ def plot_global_as_time_2(lines):
     subplot.set_title('[%d, %d)' % (interval[j],interval[j+1]))
   plt.tight_layout()
   try:
-    plt.savefig('%s.png' % (inspect.stack()[0][3]))  #plt.show()
+    plt.savefig('./Results/%s.png' % (inspect.stack()[0][3]))  #plt.show()
   except:
-    plt.savefig('plot_global_as_time_2.png')
+    plt.savefig('./Results/plot_global_as_time_2.png')
   pass
 
 
@@ -277,9 +277,9 @@ def plot_keyword_measure_days(lines):
 
   plt.tight_layout()
   try:
-    plt.savefig('%s.png' % inspect.stack()[0][3])
+    plt.savefig('./Results/%s.png' % inspect.stack()[0][3])
   except:
-    plt.savefig('plot_keyword_measure_days.png')
+    plt.savefig('./Results/plot_keyword_measure_days.png')
   pass
 
 
@@ -326,9 +326,9 @@ def plot_keyword_measure_weekdays(lines):
 
   plt.tight_layout()
   try:
-    plt.savefig('%s.png' % inspect.stack()[0][3])
+    plt.savefig('./Results/%s.png' % inspect.stack()[0][3])
   except:
-    plt.savefig('plot_keyword_measure_weekdays.png')
+    plt.savefig('./Results/plot_keyword_measure_weekdays.png')
   pass
 
 
@@ -381,7 +381,10 @@ def plot_keyword_day_missing_value_matrix(lines):
     subplot.set_ylabel('Keyword %d / %d' %(np.sum(np.isnan(resKeyword)) , float(resKeyword.shape[0])))
     subplot.set_title('%s %.2f %% ' % ( matchType,100-100*np.sum(np.isnan(res))/float(res.shape[0]*res.shape[1]) ) )
   plt.tight_layout()
-  plt.savefig('%s.png' % inspect.stack()[0][3])
+  try:
+    plt.savefig('./Results/plot_keyword_day_missing_value_matrix.png')
+  except:
+    plt.savefig('./Results/%s.png' % inspect.stack()[0][3])
   pass
 
 
@@ -406,7 +409,10 @@ def plot_imputation(data,name):
     subplot.set_title(item[0])
     if i==59: break
   plt.tight_layout()
-  plt.savefig('%s_%s.png' % (inspect.stack()[0][3],name))
+  try:
+    plt.savefig('./Results/plot_imputation.png')
+  except:
+    plt.savefig('./Results/%s.png' % inspect.stack()[0][3])
   pass
 
 #------------------------------------------------ plot regression -------------------------------------------
@@ -427,6 +433,9 @@ def plot_regression(data):
   frame.set_facecolor('1')
   for label in legend.get_texts(): label.set_fontsize('small')
   plt.tight_layout()
-  plt.savefig('%s.png' % (inspect.stack()[0][3]))
+  try:
+    plt.savefig('./Results/plot_regression.png')
+  except:
+    plt.savefig('./Results/%s.png' % inspect.stack()[0][3])
   pass
 

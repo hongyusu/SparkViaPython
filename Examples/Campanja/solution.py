@@ -51,7 +51,7 @@ if __name__ == '__main__':
                                (datetime.strptime(str(x[3]),"%Y-%m-%d")-firstDay).days, \
                                eval(x[4]), x[5], eval(x[6]), eval(x[7])])
 
-  #plotting.basic_statistics_and_plotting(lines)
+  plotting.basic_statistics_and_plotting(lines)
 
   # index keyword
   mykeyword = lines.map(lambda x: x[1]).distinct().collect()
@@ -62,18 +62,18 @@ if __name__ == '__main__':
 
   logging.warning('--------------------------------- data exploration --------------------------------- ')
 
-  #plotting.plot_global_as_time_1(lines)
-  #plotting.plot_global_as_time_2(lines)
-  #plotting.plot_keyword_measure_days(lines)
-  #plotting.plot_keyword_measure_weekdays(lines)
-  #plotting.plot_keyword_day_missing_value_matrix(lines)
+  plotting.plot_global_as_time_1(lines)
+  plotting.plot_global_as_time_2(lines)
+  plotting.plot_keyword_measure_days(lines)
+  plotting.plot_keyword_measure_weekdays(lines)
+  plotting.plot_keyword_day_missing_value_matrix(lines)
 
 
   logging.warning('--------------------------------- imputation --------------------------------- ')
   clickData      = learning.missing_value_imputation(lines,5)
   conversionData = learning.missing_value_imputation(lines,5)
-  #plotting.plot_imputation(clickData.collect(),      'click')
-  #plotting.plot_imputation(conversionData.collect(), 'conversion')
+  plotting.plot_imputation(clickData.collect(),      'click')
+  plotting.plot_imputation(conversionData.collect(), 'conversion')
 
   logging.warning('--------------------------------- regression --------------------------------- ')
   clickPrediction          = learning.local_regression(clickData,'click')
@@ -92,7 +92,7 @@ if __name__ == '__main__':
   clickPrediction      = {item[0]:item[1][0] for i,item in enumerate(clickPrediction.collect())}
   conversionPrediction = {item[0]:item[1][0] for i,item in enumerate(conversionPrediction.collect())}
 
-  fout = open(inputFilename+'.res','w')
+  fout = open('./Results/'+inputFilename+'.res','w')
   for key in clickPrediction.keys():
     fout.write("%s,%.2f\n" % (keywordReverseMap[key],conversionPrediction[key]/float(clickPrediction[key])))
     print key,keywordReverseMap[key],conversionPrediction[key],clickPrediction[key]
