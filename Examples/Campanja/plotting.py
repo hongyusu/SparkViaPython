@@ -338,7 +338,6 @@ def mapper_plot_keyword_day_missing_value_matrix(line):
   '''
   mapper function for plot_keyword_day_matrix
   '''
-  logging.warning('-------------------------- plotting missing value matrix ---------------------')
 
   r = []
   for item in line[1]:

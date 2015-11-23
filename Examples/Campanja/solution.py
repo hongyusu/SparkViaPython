@@ -15,8 +15,6 @@ import plotting
 import learning
 
 
-
-
 logging.basicConfig(format='%(asctime)s %(filename)s %(funcName)s %(levelname)s:%(message)s', level=logging.WARNING)
 
 # meta information
@@ -68,7 +66,6 @@ if __name__ == '__main__':
   plotting.plot_keyword_measure_weekdays(lines)
   plotting.plot_keyword_day_missing_value_matrix(lines)
 
-
   logging.warning('--------------------------------- imputation --------------------------------- ')
   clickData      = learning.missing_value_imputation(lines,5)
   conversionData = learning.missing_value_imputation(lines,5)
@@ -94,7 +91,7 @@ if __name__ == '__main__':
 
   fout = open('./Results/'+inputFilename+'.res','w')
   for key in clickPrediction.keys():
-    fout.write("%s,%.2f\n" % (keywordReverseMap[key],conversionPrediction[key]/float(clickPrediction[key])))
+    fout.write("%s,%.2f\n" % (keywordReverseMap[key],min(0,conversionPrediction[key]/float(clickPrediction[key]))))
     print key,keywordReverseMap[key],conversionPrediction[key],clickPrediction[key]
   fout.close()
 
