@@ -95,7 +95,10 @@ if __name__ == '__main__':
 
   fout = open('./Results/'+inputFilename+'.res','w')
   for key in clickPrediction.keys():
-    fout.write("%s,%.2f\n" % (keywordReverseMap[key],min(0,conversionPrediction[key]/float(clickPrediction[key]))))
+    try:
+      fout.write("%s,%.2f\n" % (keywordReverseMap[key],min(0,conversionPrediction[key]/float(clickPrediction[key]))))
+    except:
+      fout.write("%s,%.2f\n" % (keywordReverseMap[key],0))
     print key,keywordReverseMap[key],conversionPrediction[key],clickPrediction[key]
   fout.close()
 
