@@ -22,8 +22,7 @@ object Collect {
         "<outputDirectory> <numTweetsToCollect> <intervalInSeconds> <partitionsEachInterval>")
       System.exit(1)
     }
-    val Array(outputDirectory, Utils.IntParam(numTweetsToCollect),  Utils.IntParam(intervalSecs), Utils.IntParam(partitionsEachInterval)) =
-      Utils.parseCommandLineWithTwitterCredentials(args)
+    val Array(outputDirectory, Utils.IntParam(numTweetsToCollect),  Utils.IntParam(intervalSecs), Utils.IntParam(partitionsEachInterval)) = Utils.parseCommandLineWithTwitterCredentials(args)
     val outputDir = new File(outputDirectory.toString)
     if (outputDir.exists()) {
       System.err.println("ERROR - %s already exists: delete or specify another directory".format(
@@ -32,6 +31,7 @@ object Collect {
     }
     outputDir.mkdirs()
 
+    // spark initialization
     println("Initializing Streaming Spark Context...")
     val conf = new SparkConf().setAppName(this.getClass.getSimpleName)
     val sc = new SparkContext(conf)
