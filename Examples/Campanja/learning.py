@@ -66,9 +66,9 @@ def missing_value_imputation(lines,index):
   ranks       = [30,20,10]
   lambdas     = [0.1,0.01,0.001]
   numIters    = [10,15,20]
-  #ranks = [10]
-  #lambdas = [0.1]
-  #numIters = [2]
+  ranks = [30]
+  lambdas = [0.01,0.001]
+  numIters = [10]
   bestModel   = None
   bestValidationRmse = float("inf")
   bestRank    = 0
@@ -113,10 +113,20 @@ def missing_value_imputation(lines,index):
 
 def mapper_regression(line):
   '''
-  mapper function for local regression
-  the mapper function works on individual keywork
-  a randomforest regression model is applied to predict the next time point
+  - mapper function for local regression
+  - the mapper function works on individual keywork
+  - a randomforest regression model is applied to predict the next time point
+  - we have for each keyword
+    - [(time 1, value 1) ... (time n, value n)]
+  - transfer into
+    - training feature set [[(time 2, value 2) ... (time 8, value 8)]
+                   ,...,
+                   [(time 85, value 85) ... (time 91, value 91)]]
+    - training label [value 9, ..., value 92]
+    = test feature set [(time 86, value 86),...(time 92, value 92)]
+  - no parameter selection for current code
   '''
+  # data transfermation
   npdata = np.array(line[1])
   npdata = npdata[npdata[:,0].argsort()]
   f_tr = []
@@ -125,11 +135,14 @@ def mapper_regression(line):
     f_tr.append(npdata[i:(i+7),1])
     l_tr.append(npdata[i+6,1])
   f_ts = npdata[86:93,1]
+  # training
   clf = RandomForestRegressor(n_estimators=150, min_samples_split=1)
   clf.fit(f_tr, l_tr)
+  # prediction
   y_tr = clf.predict(f_tr)
-  # return (keyword,(predicted value, training RMSE))
-  return ( line[0], (clf.predict(f_ts).tolist()[0], math.sqrt(np.sum(clf.predict(f_tr)-l_tr)**2)) )
+  # computing rmse
+  rmse = math.sqrt(np.sum(np.array([x**2 for x in clf.predict(f_tr)-l_tr])))
+  return ( line[0], (clf.predict(f_ts).tolist()[0], rmse) )
   pass
 
 def local_regression(data,name):

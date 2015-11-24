@@ -60,6 +60,7 @@ if __name__ == '__main__':
 
   logging.warning('--------------------------------- data exploration --------------------------------- ')
 
+  # plot all kinds of statistics of data
   plotting.plot_global_as_time_1(lines)
   plotting.plot_global_as_time_2(lines)
   plotting.plot_keyword_measure_days(lines)
@@ -67,32 +68,39 @@ if __name__ == '__main__':
   plotting.plot_keyword_day_missing_value_matrix(lines)
 
   logging.warning('--------------------------------- imputation --------------------------------- ')
+  # collaborative filtering ALS for missing value imputation
   clickData      = learning.missing_value_imputation(lines,5)
   conversionData = learning.missing_value_imputation(lines,5)
   plotting.plot_imputation(clickData.collect(),      'click')
   plotting.plot_imputation(conversionData.collect(), 'conversion')
 
   logging.warning('--------------------------------- regression --------------------------------- ')
+  # do regression locally for each keyword
   clickPrediction          = learning.local_regression(clickData,'click')
   conversionPrediction     = learning.local_regression(conversionData,'conversion')
 
+  # collect rmse from each keyword and plot
   clickError      = {item[0]:item[1][1] for i,item in enumerate(clickPrediction.collect())}
   conversionError = {item[0]:item[1][1] for i,item in enumerate(conversionPrediction.collect())}
-
   for key in clickError.keys():
     clickError[key] = (key,clickError[key],conversionError[key])
   regressionError = clickError.values()
-
   plotting.plot_regression(regressionError)
 
   logging.warning('--------------------------------- output --------------------------------- ')
+  # collect data
   clickPrediction      = {item[0]:item[1][0] for i,item in enumerate(clickPrediction.collect())}
   conversionPrediction = {item[0]:item[1][0] for i,item in enumerate(conversionPrediction.collect())}
-
+  
+  # write results to file
   fout = open('./Results/'+inputFilename+'.res','w')
   for key in clickPrediction.keys():
-    fout.write("%s,%.2f\n" % (keywordReverseMap[key],min(0,conversionPrediction[key]/float(clickPrediction[key]))))
-    print key,keywordReverseMap[key],conversionPrediction[key],clickPrediction[key]
+    try:
+      fout.write("%s,%.2f\n" % (keywordReverseMap[key],max(0,conversionPrediction[key]/float(clickPrediction[key]))))
+    except Exception as msg:
+      logging.warning(msg)
+      fout.write("%s,%.2f\n" % (keywordReverseMap[key],0))
+    #print key,keywordReverseMap[key],conversionPrediction[key],clickPrediction[key]
   fout.close()
 
   sc.stop()

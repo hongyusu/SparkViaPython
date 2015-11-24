@@ -409,9 +409,9 @@ def plot_imputation(data,name):
     if i==59: break
   plt.tight_layout()
   try:
-    plt.savefig('./Results/plot_imputation.png')
+    plt.savefig('./Results/plot_imputation_%s.png' % name)
   except:
-    plt.savefig('./Results/%s.png' % inspect.stack()[0][3])
+    plt.savefig('./Results/%s_%s.png' % (inspect.stack()[0][3],name))
   pass
 
 #------------------------------------------------ plot regression -------------------------------------------
