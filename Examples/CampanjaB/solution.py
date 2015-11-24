@@ -73,9 +73,6 @@ if __name__ == '__main__':
   plotting.plot_imputation(conversionData.collect(), 'conversion')
 
   logging.warning('--------------------------------- regression --------------------------------- ')
-  #clickPrediction          = learning.local_regression(clickData,'click')
-  #conversionPrediction     = learning.local_regression(conversionData,'conversion')
-
   clickPrediction          = learning.local_autoregression(clickData,'click')
   conversionPrediction     = learning.local_autoregression(conversionData,'conversion')
 
@@ -96,10 +93,11 @@ if __name__ == '__main__':
   fout = open('./Results/'+inputFilename+'.res','w')
   for key in clickPrediction.keys():
     try:
-      fout.write("%s,%.2f\n" % (keywordReverseMap[key],min(0,conversionPrediction[key]/float(clickPrediction[key]))))
-    except:
+      fout.write("%s,%.2f\n" % (keywordReverseMap[key],max(0,conversionPrediction[key]/float(clickPrediction[key]))))
+    except Exception as msg:
+      logging.warning(msg)
       fout.write("%s,%.2f\n" % (keywordReverseMap[key],0))
-    print key,keywordReverseMap[key],conversionPrediction[key],clickPrediction[key]
+    #print key,keywordReverseMap[key],conversionPrediction[key],clickPrediction[key]
   fout.close()
 
   sc.stop()
